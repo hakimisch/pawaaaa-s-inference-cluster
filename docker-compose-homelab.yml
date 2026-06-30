@@ -1,0 +1,69 @@
+# Homelab Service Node — Docker Compose
+# Runs on the homelab server (connects to compute node via Tailscale)
+
+x-environment: &env
+  OLLAMA_BASE_URL: http://{{COMPUTE_IP}}:11434
+  OPENAI_API_BASE_URL: http://{{COMPUTE_IP}}:8000/v1
+  OPENAI_API_KEY: sk-placeholder
+  WEBUI_SECRET_KEY: ${WEBUI_SECRET_KEY:-change-in-production}
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: llm-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/llm.conf:ro
+    depends_on:
+      - open-webui
+      - grafana
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui-data:/app/backend/data
+    environment:
+      <<: *env
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana-provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SERVER_ROOT_URL=http://localhost/grafana/
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    depends_on:
+      - prometheus
+
+volumes:
+  open-webui-data:
+  prometheus_data:
+  grafana_data:
