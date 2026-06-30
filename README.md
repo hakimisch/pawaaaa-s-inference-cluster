@@ -187,6 +187,7 @@ streamlit run pipeline_app.py --server.port 8501
 
 Open `http://{{COMPUTE_IP}}:8501` or `http://{{HOSTNAME}}/pipeline/` (if proxied).
 
+
 ---
 
 ## Benchmarking
@@ -208,6 +209,25 @@ The Streamlit UI includes a built-in benchmark runner. Click **"Run Benchmark"**
 | General | "What is the capital of Mongolia?" |
 
 Results compare latency (ms), throughput (tok/s), and VRAM usage across models.
+
+### Benchmark Results
+
+All graphs are available in `benchmark_graphs/runs/`:
+
+#### Engine Performance Comparison
+![vLLM Before/After](benchmark_graphs/runs/vllm_before_after.png)
+
+#### Ollama Model Comparison
+![Ollama Comparison](benchmark_graphs/runs/ollama_comparison.png)
+
+#### Throughput per Category
+![Throughput per Category](benchmark_graphs/runs/throughput_per_category.png)
+
+#### Latency per Category
+![Latency per Category](benchmark_graphs/runs/latency_per_category.png)
+
+#### Efficiency Ranking
+![Efficiency Ranking](benchmark_graphs/runs/efficiency_ranking.png)
 
 ---
 
@@ -232,6 +252,7 @@ Results compare latency (ms), throughput (tok/s), and VRAM usage across models.
 | `pipeline_app.py` | Streamlit control panel (948 lines) — GPU metrics, benchmarks, training |
 | `prometheus.yml` | Prometheus scrape configuration |
 | `grafana-provisioning/` | Grafana dashboard provisioning (dashboards, datasources) |
+| `benchmark_graphs/runs/` | Benchmark result graphs (vLLM/Ollama latency, throughput, efficiency) |
 
 ---
 
